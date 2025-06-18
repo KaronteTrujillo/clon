@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor de Subbots</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .error { color: red; }
+    .form { margin-bottom: 20px; }
+    button { margin-left: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Gestor de Subbots</h1>
+  <div class="form">
+    <input type="text" id="numberInput" placeholder="Número (e.g., +18297950042)">
+    <button onclick="startSubbot()">Iniciar Subbot</button>
+  </div>
+  <table id="subbotsTable">
+    <thead>
+      <tr>
+        <th>Número</th>
+        <th>Estado</th>
+        <th>Código de Vinculación</th>
+        <th>Puerto</th>
+        <th>Error</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="subbotsBody"></tbody>
+  </table>
+
+  <script>
+    async function fetchSubbots() {
+      const response = await fetch("/api/subbots");
+      const subbots = await response.json();
+      const tbody = document.getElementById("subbotsBody");
+      tbody.innerHTML = "";
+      subbots.forEach(s => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${s.number}</td>
+          <td>${s.status}</td>
+          <td>${s.linkingCode || "-"}</td>
+          <td>${s.port}</td>
+          <td class="error">${s.error || "-"}</td>
+          <td><button onclick="stopSubbot('${s.number}')">Detener</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function startSubbot() {
+      const number = document.getElementById("numberInput").value;
+      try {
+        await fetch("/api/subbots", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ number }),
+        });
+        fetchSubbots();
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    }
+
+    async function stopSubbot(number) {
+      try {
+        await fetch(`/api/subbots/${number}`, { method: "DELETE" });
+        fetchSubbots();
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    }
+
+    setInterval(fetchSubbots, 5000); // Actualizar cada 5 segundos
+    fetchSubbots();
+  </script>
+</body>
+</html>

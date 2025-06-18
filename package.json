@@ -1,0 +1,14 @@
+{
+  "name": "subbot",
+  "version": "1.0.0",
+  "description": "Subbot sencillo para generar códigos de vinculación",
+  "main": "subbot.js",
+  "scripts": {
+    "start": "node subbot.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "author": "Tu Nombre",
+  "license": "MIT"
+}
